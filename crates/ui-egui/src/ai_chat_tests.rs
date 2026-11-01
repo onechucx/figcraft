@@ -159,6 +159,16 @@ fn a_sub_agent_adds_its_instructions_after_the_shared_ones() {
 }
 
 #[test]
+fn the_panel_opens_on_the_local_model_so_no_key_is_asked_for() {
+    let app = app();
+    assert_eq!(app.ai.choice().route, "DeepSeek");
+    assert_eq!(app.ai.choice().label, "hermes (local)");
+    assert!(!app.ai.choice().needs_key);
+    assert!(app.ai.setup().key.is_empty());
+    assert_eq!(app.ai.setup().endpoint, deepseek::LOCAL_ENDPOINT);
+}
+
+#[test]
 fn switching_provider_lands_on_its_first_model_and_keeping_the_provider_keeps_its_model() {
     let mut app = app();
     app.ai.model = deepseek::first_model("DeepSeek").unwrap_or(0) + 1;
@@ -173,6 +183,8 @@ fn switching_provider_lands_on_its_first_model_and_keeping_the_provider_keeps_it
 #[test]
 fn the_request_carries_the_provider_and_the_sub_agents_instructions() {
     let mut app = app();
+    // The panel opens on the local model, which takes no key, so pick an API model to send one.
+    app.ai.model = deepseek::CHOICES.iter().position(|c| c.needs_key).expect("an API model");
     app.ai.key = "test-key".into();
     app.ai.sub_agent = 2;
     let setup = app.ai.setup();

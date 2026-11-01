@@ -339,6 +339,16 @@ fn every_local_choice_needs_no_key_and_reads_no_images() {
 }
 
 #[test]
+fn an_unreachable_local_model_is_told_how_to_start_it() {
+    let local = setup(LOCAL_ENDPOINT.to_string());
+    let message = unreachable_message(&local, "connection refused");
+    assert!(message.contains("ollama serve"), "{message}");
+    assert!(message.contains("connection refused"), "{message}");
+    let api = setup(ENDPOINT.to_string());
+    assert_eq!(unreachable_message(&api, "connection refused"), "Could not reach DeepSeek: connection refused");
+}
+
+#[test]
 fn the_panel_lists_two_providers_and_names_the_first_model_of_each() {
     assert_eq!(providers(), vec!["DeepSeek", "Antigravity"]);
     assert_eq!(first_model("DeepSeek"), Some(0));

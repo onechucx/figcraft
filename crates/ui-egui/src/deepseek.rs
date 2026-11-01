@@ -53,7 +53,18 @@ pub struct Choice {
 }
 
 /// The models the panel offers, in the order it shows them. A provider's models are listed together.
+/// The local model comes first: it needs no key, so the panel opens on it.
 pub static CHOICES: [Choice; 4] = [
+    Choice {
+        route: "DeepSeek",
+        label: "hermes (local)",
+        endpoint: LOCAL_ENDPOINT,
+        model: "deepseek-hermes:latest",
+        needs_key: false,
+        reads_images: false,
+        text_tools: true,
+        timeout: LOCAL_TIMEOUT,
+    },
     Choice {
         route: "DeepSeek",
         label: "deepseek-v4-pro",
@@ -73,16 +84,6 @@ pub static CHOICES: [Choice; 4] = [
         reads_images: true,
         text_tools: false,
         timeout: TIMEOUT,
-    },
-    Choice {
-        route: "DeepSeek",
-        label: "hermes (local)",
-        endpoint: LOCAL_ENDPOINT,
-        model: "deepseek-hermes:latest",
-        needs_key: false,
-        reads_images: false,
-        text_tools: true,
-        timeout: LOCAL_TIMEOUT,
     },
     Choice {
         route: "Antigravity",
@@ -297,6 +298,16 @@ fn system_text(setup: &Setup) -> String {
     text
 }
 
+/// The message for a call that got no reply. A local model that is not running says how to start it,
+/// since Ollama is the program that serves it.
+fn unreachable_message(setup: &Setup, error: impl std::fmt::Display) -> String {
+    if setup.endpoint == LOCAL_ENDPOINT {
+        format!("Could not reach the local model: Ollama is not answering on this computer. Start it with `ollama serve` ({error})")
+    } else {
+        format!("Could not reach {}: {error}", setup.provider)
+    }
+}
+
 /// One chat-completions call: the assistant's message from the reply. The key goes only to the API;
 /// a local endpoint is called without it.
 fn complete(agent: &ureq::Agent, setup: &Setup, messages: &[Value]) -> Result<Value, String> {
@@ -308,7 +319,7 @@ fn complete(agent: &ureq::Agent, setup: &Setup, messages: &[Value]) -> Result<Va
         request = request.header("Authorization", format!("Bearer {}", setup.key));
     }
     let provider = setup.provider;
-    let reply = request.send_json(&body).map_err(|e| format!("Could not reach {provider}: {e}"))?;
+    let reply = request.send_json(&body).map_err(|e| unreachable_message(setup, e))?;
     let status = reply.status();
     let text = reply.into_body().read_to_string().map_err(|e| format!("Could not read the reply from {provider}: {e}"))?;
     if !status.is_success() {
