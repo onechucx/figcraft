@@ -1089,6 +1089,8 @@ fn ui_set_view(app: &mut FigApp, ctx: &Context, p: &Value) -> Result<(), String>
         app.ui.right_tab = match t {
             "prototype" => crate::RightTab::Prototype,
             "inspect" => crate::RightTab::Inspect,
+            #[cfg(not(target_arch = "wasm32"))]
+            "ai" => crate::RightTab::Ai,
             _ => crate::RightTab::Design,
         };
     }

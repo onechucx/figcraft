@@ -3,6 +3,9 @@ pub enum RightTab {
     Design,
     Prototype,
     Inspect,
+    /// The AI chat (native builds only: the browser build has no sockets).
+    #[cfg(not(target_arch = "wasm32"))]
+    Ai,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]

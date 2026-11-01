@@ -15,10 +15,14 @@ pub const UPDATE_APP: craft_update::app::App = craft_update::app::App {
 };
 
 pub mod a11y;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod ai_chat;
 pub mod bidi;
 pub mod canvas;
 pub mod cjk;
 pub mod control;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod deepseek;
 pub mod dialogs;
 pub mod home;
 pub mod i18n;
@@ -33,6 +37,8 @@ pub mod tabs;
 pub mod theme;
 pub mod toolbar;
 pub mod ui_scale;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod web_page;
 pub mod widgets;
 pub mod windows;
 
@@ -763,6 +769,9 @@ pub struct FigApp {
     /// The automation roots the app was started with: every frame and control request runs
     /// confined to them ([`windows::guard`]).
     pub automation_roots: Option<Arc<figcraft_engine::file_access::Roots>>,
+    /// The AI chat's state and the worker thread that talks to DeepSeek (native builds only).
+    #[cfg(not(target_arch = "wasm32"))]
+    pub ai: ai_chat::AiChat,
     /// The active-document id when synthetic input was queued: a batch is dropped when the file
     /// changed before a UI pass applied it.
     pub(crate) control_input_doc: Option<u64>,

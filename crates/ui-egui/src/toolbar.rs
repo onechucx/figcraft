@@ -283,6 +283,9 @@ fn mode_switcher(app: &mut FigApp, ui: &mut Ui, x: f32, cy: f32, t: &Tokens) {
         crate::RightTab::Design => 1,
         crate::RightTab::Prototype => 2,
         crate::RightTab::Inspect => 3,
+        // The AI tab is not one of these modes, so none is highlighted.
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::RightTab::Ai => usize::MAX,
     };
     let seg = Rect::from_min_size(pos2(x, cy - TOOL_CELL / 2.0), vec2(4.0 * TOOL_CELL, TOOL_CELL));
     ui.painter().rect_filled(seg, CornerRadius::same(5), t.field);

@@ -45,6 +45,8 @@ impl FigApp {
             pending_dialog: None,
             ui_context: None,
             automation_roots: None,
+            #[cfg(not(target_arch = "wasm32"))]
+            ai: crate::ai_chat::AiChat::new(),
             control_input_doc: None,
             control_synthetic: false,
             input_acks: Vec::new(),
@@ -218,6 +220,8 @@ impl FigApp {
         self.poll_dialog(&ctx);
         // Control requests run first so their results reflect this frame.
         crate::control::drain(self, &ctx);
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::ai_chat::pump(self, &ctx);
         windows::requests(self, &ctx);
         selection_spacing::sync(self, &ctx);
         // Before any widget: the navigation keys (F6, Tab, arrows, Escape) move the keyboard.
@@ -325,6 +329,8 @@ impl FigApp {
                         RightTab::Design => i18n::tr("Design"),
                         RightTab::Prototype => i18n::tr("Prototype"),
                         RightTab::Inspect => i18n::tr("Dev Mode"),
+                        #[cfg(not(target_arch = "wasm32"))]
+                        RightTab::Ai => i18n::tr("AI chat"),
                     };
                     a11y::region(&mut self.ui.nav, ui, a11y::Region::Properties, egui::accesskit::Role::Pane, label);
                     right::right_panel(self, ui)

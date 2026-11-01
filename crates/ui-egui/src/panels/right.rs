@@ -1,4 +1,4 @@
-//! The right panel: Design, Prototype and Inspect tabs.
+//! The right panel: Design, Prototype and Inspect tabs, and the AI chat tab (native builds).
 
 use std::sync::Arc;
 
@@ -158,7 +158,11 @@ pub fn right_panel(app: &mut FigApp, ui: &mut Ui) {
     let (tabs, _) = ui.allocate_exact_size(vec2(w, 40.0), Sense::hover());
     ui.painter().line_segment([tabs.left_top(), tabs.right_top()], Stroke::new(1.0, t.border));
     let mut x = tabs.min.x + 8.0;
-    for (tab, label) in [(RightTab::Design, tr("Design")), (RightTab::Prototype, tr("Prototype"))] {
+    #[cfg_attr(target_arch = "wasm32", allow(unused_mut))]
+    let mut tab_list = vec![(RightTab::Design, tr("Design")), (RightTab::Prototype, tr("Prototype"))];
+    #[cfg(not(target_arch = "wasm32"))]
+    tab_list.push((RightTab::Ai, tr("AI")));
+    for (tab, label) in tab_list {
         let galley = ui.painter().layout_no_wrap(label.into(), semibold(11.0), t.text);
         let r = Rect::from_min_size(pos2(x, tabs.center().y - 12.0), vec2(galley.size().x + 16.0, 24.0));
         let resp = ui.interact(r, ui.scope_id().with(("rtab", label)), Sense::click());
@@ -227,6 +231,12 @@ pub fn right_panel(app: &mut FigApp, ui: &mut Ui) {
         }
     });
     ui.painter().line_segment([tabs.left_bottom(), tabs.right_bottom()], Stroke::new(1.0, t.border));
+    // The chat keeps its own scrolling log and draft at the bottom, so it takes the rest of the panel.
+    #[cfg(not(target_arch = "wasm32"))]
+    if app.ui.right_tab == RightTab::Ai {
+        crate::ai_chat::panel(&mut app.ai, ui);
+        return;
+    }
     egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
         ui.spacing_mut().item_spacing = vec2(8.0, 0.0);
         if app.session.tool.tool == figcraft_engine::ToolId::Comment {
@@ -240,6 +250,9 @@ pub fn right_panel(app: &mut FigApp, ui: &mut Ui) {
             RightTab::Design => design(app, ui),
             RightTab::Prototype => crate::proto_panel::prototype(app, ui),
             RightTab::Inspect => inspect(app, ui),
+            // Drawn above, outside the scroll area.
+            #[cfg(not(target_arch = "wasm32"))]
+            RightTab::Ai => {}
         }
         ui.add_space(80.0);
         a11y::scroll_focus(&mut app.ui.nav, ui);
