@@ -181,6 +181,18 @@ fn switching_provider_lands_on_its_first_model_and_keeping_the_provider_keeps_it
 }
 
 #[test]
+fn a_chosen_antigravity_model_is_sent_its_own_name_and_no_key() {
+    let mut app = app();
+    switch_provider(&mut app.ai, "Antigravity");
+    app.ai.model = deepseek::CHOICES.iter().position(|c| c.model == "qwen3.5:35b").expect("the planner");
+    let setup = app.ai.setup();
+    assert_eq!(setup.provider, "Antigravity");
+    assert_eq!(setup.model, "qwen3.5:35b");
+    assert_eq!(setup.endpoint, deepseek::LOCAL_ENDPOINT);
+    assert!(setup.key.is_empty());
+}
+
+#[test]
 fn the_request_carries_the_provider_and_the_sub_agents_instructions() {
     let mut app = app();
     // The panel opens on the local model, which takes no key, so pick an API model to send one.

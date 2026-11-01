@@ -330,7 +330,7 @@ fn later_turns_keep_the_words_of_an_image_message_and_not_the_image() {
 #[test]
 fn every_local_choice_needs_no_key_and_reads_no_images() {
     let local: Vec<&Choice> = CHOICES.iter().filter(|c| c.endpoint == LOCAL_ENDPOINT).collect();
-    assert_eq!(local.len(), 2);
+    assert_eq!(local.len(), 5);
     for choice in local {
         assert!(!choice.needs_key, "{}", choice.label);
         assert!(choice.text_tools, "{}", choice.label);
@@ -354,6 +354,12 @@ fn the_panel_lists_two_providers_and_names_the_first_model_of_each() {
     assert_eq!(first_model("DeepSeek"), Some(0));
     assert_eq!(first_model("Antigravity"), Some(3));
     assert_eq!(first_model("Nobody"), None);
+}
+
+#[test]
+fn antigravity_offers_a_planner_and_coders_of_different_sizes() {
+    let models: Vec<&str> = CHOICES.iter().filter(|c| c.route == "Antigravity").map(|c| c.model).collect();
+    assert_eq!(models, ["antigravity:latest", "qwen2.5-coder:14b", "qwen3-coder:30b", "qwen3.5:35b"]);
 }
 
 #[test]

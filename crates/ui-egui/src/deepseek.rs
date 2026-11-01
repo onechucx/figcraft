@@ -54,7 +54,7 @@ pub struct Choice {
 
 /// The models the panel offers, in the order it shows them. A provider's models are listed together.
 /// The local model comes first: it needs no key, so the panel opens on it.
-pub static CHOICES: [Choice; 4] = [
+pub static CHOICES: [Choice; 7] = [
     Choice {
         route: "DeepSeek",
         label: "hermes (local)",
@@ -90,6 +90,36 @@ pub static CHOICES: [Choice; 4] = [
         label: "antigravity",
         endpoint: LOCAL_ENDPOINT,
         model: "antigravity:latest",
+        needs_key: false,
+        reads_images: false,
+        text_tools: true,
+        timeout: LOCAL_TIMEOUT,
+    },
+    Choice {
+        route: "Antigravity",
+        label: "qwen2.5-coder:14b (code, small)",
+        endpoint: LOCAL_ENDPOINT,
+        model: "qwen2.5-coder:14b",
+        needs_key: false,
+        reads_images: false,
+        text_tools: true,
+        timeout: LOCAL_TIMEOUT,
+    },
+    Choice {
+        route: "Antigravity",
+        label: "qwen3-coder:30b (code)",
+        endpoint: LOCAL_ENDPOINT,
+        model: "qwen3-coder:30b",
+        needs_key: false,
+        reads_images: false,
+        text_tools: true,
+        timeout: LOCAL_TIMEOUT,
+    },
+    Choice {
+        route: "Antigravity",
+        label: "qwen3.5:35b (plan)",
+        endpoint: LOCAL_ENDPOINT,
+        model: "qwen3.5:35b",
         needs_key: false,
         reads_images: false,
         text_tools: true,
